@@ -9,13 +9,24 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental == true }}
     strategy:
+      # fail-fast: false ensures all matrix combinations run to completion even if one fails, providing complete visibility across all target environments.
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         node: [18, 20, 22]
+        include:
+          - os: ubuntu-latest
+            node: 24
+            experimental: true
+          - os: windows-latest
+            node: 24
+            experimental: true
     steps:
       - uses: actions/checkout@v4
       - name: Print environment info for debugging
+        shell: bash
         run: |
           node --version
           npm --version
@@ -24,3 +35,4 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm ci
       - run: npm test
+
